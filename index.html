@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bate Papo 02</title>
+  <link rel="stylesheet" href="index.css">
+  </link>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+  </script>
+
+</head>
+
+<body>
+  <header>
+    <form>
+      <input type="text" id="msg" autofocus autocomplete="off" placeholder="Digite seu nickname pra iniciar">
+      <button type="submit">enviar</button>
+    </form>
+  </header>
+  <main>
+    <ul id="mensagens">
+    </ul>
+    <div id='status'></div>
+  </main>
+  
+  <script>
+    $(() => {
+      const socket = io()
+      socket.nickname = ''
+
+      $('form').submit(evt => {
+        if(socket.nickname===''){
+          socket.nickname = $('#msg').val()
+
+          socket.emit('login', socket.nickname)
+
+          $('#msg').keypress((evt)=>{
+          socket.emit('status', `<strong>${socket.nickname}</strong> está digitando...`)
+          })
+
+          $('#msg').keyup((evt)=>{
+            setTimeout(()=>socket.emit('status', ``),3000)
+            
+          })
+        }
+        else{
+          socket.emit('chat msg', $('#msg').val())
+        }
+
+        $('#msg').val('')
+
+        document.getElementById("msg").placeholder='Digite sua mensagem'
+          return false
+      })
+
+      socket.on('chat msg',(msg)=>{
+       $('#mensagens').append($('<li>').text(msg))
+      })
+
+      socket.on('status',(msg)=>{
+       $('#status').html(msg)
+      })
+      
+
+    })
+  </script>
+</body>
+
+</html>
